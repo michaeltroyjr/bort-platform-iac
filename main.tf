@@ -11,4 +11,9 @@ terraform {
 
 provider "aws" {
   region = "us-east-1"
+  profile = "terraform"
+}
+
+resource "aws_s3_bucket" "supreme_marines" {
+  # (resource arguments)
 }
