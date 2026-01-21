@@ -14,6 +14,6 @@ provider "aws" {
   profile = "terraform"
 }
 
-resource "aws_s3_bucket" "supreme_marines" {
-  # (resource arguments)
+resource "aws_s3_bucket" "s3_bucket" {
+  bucket = "supreme-marines-2"
 }
