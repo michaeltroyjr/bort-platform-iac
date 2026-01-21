@@ -22,5 +22,5 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "supreme-marines-2"
+  bucket = "bort-supreme-marines-3"
 }
