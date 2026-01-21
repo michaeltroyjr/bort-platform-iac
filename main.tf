@@ -7,10 +7,17 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket  = "state-file-iac"
+    key     = "static-site/terraform.tfstate"
+    region  = "us-east-2"
+    encrypt = true
+  }
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region  = "us-east-2"
   profile = "terraform"
 }
 
