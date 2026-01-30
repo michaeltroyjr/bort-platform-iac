@@ -7,20 +7,18 @@ terraform {
       version = "~> 5.0"
     }
   }
-
-  backend "s3" {
-    bucket  = "state-file-iac"
-    key     = "static-site/terraform.tfstate"
-    region  = "us-east-2"
-    encrypt = true
-  }
 }
 
 provider "aws" {
-  region  = "us-east-2"
-  profile = "terraform"
+  region  = var.aws_region
 }
 
-resource "aws_s3_bucket" "s3_bucket" {
-  bucket = "bort-supreme-marines-3"
+module "static_site" {
+  source      = "./modules/static_site"
+  bucket_name = var.bucket_name
+}
+
+module "cloudfront" {
+  source                 = "./modules/cloudfront"
+  s3_bucket_domain_name  = module.static_site.bucket_id
 }
