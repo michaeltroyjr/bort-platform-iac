@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 module "static_site" {
-  source      = "./modules/static_site"
+  source      = "./modules/static-site"
   bucket_name = var.bucket_name
 }
 
