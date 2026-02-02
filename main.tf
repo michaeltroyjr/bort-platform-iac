@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "aws" {
-  region  = var.aws_region
+  region = var.aws_region
 }
 
 module "static_site" {
@@ -19,6 +19,6 @@ module "static_site" {
 }
 
 module "cloudfront" {
-  source                 = "./modules/cloudfront"
-  s3_bucket_domain_name  = module.static_site.bucket_id
+  source                = "./modules/cloudfront"
+  s3_bucket_domain_name = module.static_site.bucket_id
 }
