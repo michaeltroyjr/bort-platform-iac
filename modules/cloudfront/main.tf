@@ -1,4 +1,4 @@
-resource "aws_cloudfront_distribution" "supreme_marines" {
+resource "aws_cloudfront_distribution" "s3_distribution" {
   enabled             = true
   default_root_object = "index.html"
 
@@ -31,4 +31,14 @@ resource "aws_cloudfront_distribution" "supreme_marines" {
       restriction_type = "none"
     }
   }
+}
+
+resource "aws_acm_certificate" "cf_cert" {
+  domain_name       = "supreme-marines.bortplatforms.com"
+  validation_method = "DNS"
+
+  subject_alternative_names = [
+    "bortplatforms.com",
+    "www.bortplatforms.com"
+  ]
 }
