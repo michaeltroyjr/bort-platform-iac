@@ -34,6 +34,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 }
 
 resource "aws_acm_certificate" "cf_cert" {
+  provider = aws.east-1
   domain_name       = "supreme-marines.bortplatforms.com"
   validation_method = "DNS"
 
