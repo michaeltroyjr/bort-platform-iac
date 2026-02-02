@@ -4,5 +4,6 @@ terraform {
     key     = "envs/prod/terraform.tfstate"
     region  = "us-east-2"
     encrypt = true
+    profile = "terraform"
   }
 }
