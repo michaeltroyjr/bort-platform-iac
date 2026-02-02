@@ -14,7 +14,7 @@ provider "aws" {
 }
 
 provider "aws" {
-  alias  = "east-1"
+  alias  = "east1"
   region = "us-east-1"
 }
 
@@ -26,4 +26,11 @@ module "static_site" {
 module "cloudfront" {
   source                = "./modules/cloudfront"
   s3_bucket_domain_name = module.static_site.bucket_regional_domain_name
+  hosted_zone_id        = var.hosted_zone_id
+
+  
+  providers = {
+    aws = aws
+    aws.east1 = aws.east1
+  }
 }
