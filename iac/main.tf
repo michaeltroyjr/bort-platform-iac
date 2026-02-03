@@ -27,6 +27,7 @@ module "cloudfront" {
   source                = "./modules/cloudfront"
   s3_bucket_domain_name = module.static_site.bucket_regional_domain_name
   hosted_zone_id        = var.hosted_zone_id
+  sub_domain = var.sub_domain
 
 
   providers = {
