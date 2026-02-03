@@ -28,9 +28,9 @@ module "cloudfront" {
   s3_bucket_domain_name = module.static_site.bucket_regional_domain_name
   hosted_zone_id        = var.hosted_zone_id
 
-  
+
   providers = {
-    aws = aws
+    aws       = aws
     aws.east1 = aws.east1
   }
 }

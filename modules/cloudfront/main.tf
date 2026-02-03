@@ -8,19 +8,31 @@ terraform {
   }
 }
 
+resource "aws_cloudfront_origin_access_control" "s3_oac" {
+  name                              = "s3-oac"
+  description                       = "OAC for S3 bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
 resource "aws_cloudfront_distribution" "s3_distribution" {
   depends_on = [aws_acm_certificate_validation.cf_cert_validation]
   enabled             = true
   default_root_object = "index.html"
+  price_class         = "PriceClass_100"
+  web_acl_id                      = "arn:aws:wafv2:us-east-1:354672111799:global/webacl/CreatedByCloudFront-ed845f24/9adf3acf-ba9f-4787-874c-7daa075f6690"
 
   aliases = [
     "supreme-marines.bortplatforms.com"
   ]
 
   origin {
-    domain_name = var.s3_bucket_domain_name
-    origin_id   = "S3Origin"
+    domain_name              = var.s3_bucket_domain_name
+    origin_id                = "S3Origin"
+    origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
   }
+
 
   default_cache_behavior {
     target_origin_id       = "S3Origin"
