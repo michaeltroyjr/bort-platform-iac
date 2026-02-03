@@ -1,8 +1,3 @@
-variable "bucket_name" {
-  type        = string
-  description = "Name of the S3 bucket"
-}
-
 variable "aws_region" {
   type        = string
   description = "aws region"
@@ -13,7 +8,7 @@ variable "hosted_zone_id" {
   description = "Route53 hosted zone ID for certificate DNS validation"
 }
 
-variable "sub_domain" {
-  type        = string
-  description = "sub domain for app to live"
+variable "apps" {
+  type        = map(any)
+  description = "Each app deploys infra for that app"
 }

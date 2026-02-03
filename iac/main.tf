@@ -19,17 +19,19 @@ provider "aws" {
 }
 
 module "static_site" {
+  for_each    = var.apps
   source      = "./modules/static-site"
-  bucket_name = var.bucket_name
+  bucket_name = each.value.bucket_name
 }
 
 module "cloudfront" {
+  for_each              = var.apps
   source                = "./modules/cloudfront"
-  s3_bucket_domain_name = module.static_site.bucket_regional_domain_name
+  s3_bucket_domain_name = module.static_site[each.key].bucket_regional_domain_name
   hosted_zone_id        = var.hosted_zone_id
-  sub_domain = var.sub_domain
-  bucket_arn = module.static_site.bucket_arn
-  bucket_id = module.static_site.bucket_id
+  sub_domain            = each.value.sub_domain
+  bucket_arn            = module.static_site[each.key].bucket_arn
+  bucket_id             = module.static_site[each.key].bucket_id
 
   providers = {
     aws       = aws
