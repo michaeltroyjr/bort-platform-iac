@@ -34,3 +34,24 @@ module "cloudfront" {
     aws.east1 = aws.east1
   }
 }
+
+data "aws_iam_policy_document" "s3_cloudfront_policy" {
+  statement {
+    actions   = ["s3:GetObject"]
+    resources = ["${module.static_site.bucket_arn}/*"]
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [module.cloudfront.distribution_arn]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "cloudfront_access" {
+  bucket = module.static_site.bucket_id
+  policy = data.aws_iam_policy_document.s3_cloudfront_policy.json
+}

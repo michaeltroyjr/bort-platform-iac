@@ -20,7 +20,6 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   depends_on = [aws_acm_certificate_validation.cf_cert_validation]
   enabled             = true
   default_root_object = "index.html"
-  price_class         = "PriceClass_100"
   web_acl_id                      = "arn:aws:wafv2:us-east-1:354672111799:global/webacl/CreatedByCloudFront-ed845f24/9adf3acf-ba9f-4787-874c-7daa075f6690"
 
   aliases = [
