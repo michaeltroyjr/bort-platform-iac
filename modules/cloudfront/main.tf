@@ -29,6 +29,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
     domain_name              = var.s3_bucket_domain_name
     origin_id                = "S3Origin"
+    origin_path              = "/supreme-marines"
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
   }
 

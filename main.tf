@@ -36,13 +36,18 @@ module "cloudfront" {
 }
 
 data "aws_iam_policy_document" "s3_cloudfront_policy" {
+  version = "2008-10-17"
+
   statement {
+    sid       = "AllowCloudFrontServicePrincipal"
     actions   = ["s3:GetObject"]
     resources = ["${module.static_site.bucket_arn}/*"]
+
     principals {
       type        = "Service"
       identifiers = ["cloudfront.amazonaws.com"]
     }
+
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
