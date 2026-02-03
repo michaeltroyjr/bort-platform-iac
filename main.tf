@@ -54,4 +54,5 @@ data "aws_iam_policy_document" "s3_cloudfront_policy" {
 resource "aws_s3_bucket_policy" "cloudfront_access" {
   bucket = module.static_site.bucket_id
   policy = data.aws_iam_policy_document.s3_cloudfront_policy.json
+  depends_on = [module.cloudfront]
 }
