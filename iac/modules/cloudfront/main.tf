@@ -23,13 +23,13 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   web_acl_id                      = "arn:aws:wafv2:us-east-1:354672111799:global/webacl/CreatedByCloudFront-ed845f24/9adf3acf-ba9f-4787-874c-7daa075f6690"
 
   aliases = [
-    "${sub_domain}.bortplatforms.com"
+    "${var.sub_domain}.bortplatforms.com"
   ]
 
   origin {
     domain_name              = var.s3_bucket_domain_name
     origin_id                = "S3Origin"
-    origin_path              = "/${sub_domain}"
+    origin_path              = "/${var.sub_domain}"
     origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
   }
 
@@ -58,7 +58,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
 resource "aws_acm_certificate" "cf_cert" {
   provider = aws.east1
-  domain_name       = "${sub_domain}.bortplatforms.com"
+  domain_name       = "${var.sub_domain}.bortplatforms.com"
   validation_method = "DNS"
 
   subject_alternative_names = [
