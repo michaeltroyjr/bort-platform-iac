@@ -89,3 +89,30 @@ resource "aws_acm_certificate_validation" "cf_cert_validation" {
   certificate_arn        = aws_acm_certificate.cf_cert.arn
   validation_record_fqdns = [for r in aws_route53_record.cert_validation : r.fqdn]
 }
+
+data "aws_iam_policy_document" "s3_cloudfront_policy" {
+  version = "2008-10-17"
+
+  statement {
+    sid       = "AllowCloudFrontServicePrincipal"
+    actions   = ["s3:GetObject"]
+    resources = ["${var.bucket_arn}/*"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [ aws_cloudfront_distribution.s3_distribution.arn ]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "cloudfront_access" {
+  depends_on = [aws_cloudfront_distribution.s3_distribution]
+  bucket = var.bucket_id
+  policy = data.aws_iam_policy_document.s3_cloudfront_policy.json
+}

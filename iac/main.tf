@@ -28,37 +28,11 @@ module "cloudfront" {
   s3_bucket_domain_name = module.static_site.bucket_regional_domain_name
   hosted_zone_id        = var.hosted_zone_id
   sub_domain = var.sub_domain
-
+  bucket_arn = module.static_site.bucket_arn
+  bucket_id = module.static_site.bucket_id
 
   providers = {
     aws       = aws
     aws.east1 = aws.east1
   }
-}
-
-data "aws_iam_policy_document" "s3_cloudfront_policy" {
-  version = "2008-10-17"
-
-  statement {
-    sid       = "AllowCloudFrontServicePrincipal"
-    actions   = ["s3:GetObject"]
-    resources = ["${module.static_site.bucket_arn}/*"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [module.cloudfront.distribution_arn]
-    }
-  }
-}
-
-resource "aws_s3_bucket_policy" "cloudfront_access" {
-  bucket = module.static_site.bucket_id
-  policy = data.aws_iam_policy_document.s3_cloudfront_policy.json
-  depends_on = [module.cloudfront]
 }
