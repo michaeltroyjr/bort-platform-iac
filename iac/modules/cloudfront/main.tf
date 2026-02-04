@@ -138,3 +138,31 @@ resource "aws_s3_bucket_policy" "cloudfront_access" {
   bucket     = each.value.id
   policy     = data.aws_iam_policy_document.s3_cloudfront_policy[each.key].json
 }
+
+resource "aws_route53_record" "cloudfront_alias" {
+  for_each = var.s3_buckets
+
+  zone_id = var.hosted_zone_id
+  name    = "${each.value.sub_domain}.bortplatforms.com"
+  type    = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "cloudfront_alias_ipv6" {
+  for_each = var.s3_buckets
+
+  zone_id = var.hosted_zone_id
+  name    = "${each.value.sub_domain}.bortplatforms.com"
+  type    = "AAAA"
+
+  alias {
+    name                   = aws_cloudfront_distribution.s3_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.s3_distribution.hosted_zone_id
+    evaluate_target_health = false
+  }
+}
