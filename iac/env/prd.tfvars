@@ -6,4 +6,8 @@ apps = {
     sub_domain = "supreme-marines"
     bucket_name = "bort-supreme-marines-2"
   }
+  welcome = {
+    sub_domain = "welcome"
+    bucket_name = "welcome-bort"
+  }
 }

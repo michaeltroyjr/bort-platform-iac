@@ -9,7 +9,7 @@ terraform {
 }
 
 resource "aws_cloudfront_origin_access_control" "s3_oac" {
-  name                              = "s3-oac"
+  name                              = "s3-${var.sub_domain}"
   description                       = "OAC for S3 bucket"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
@@ -61,10 +61,6 @@ resource "aws_acm_certificate" "cf_cert" {
   domain_name       = "${var.sub_domain}.bortplatforms.com"
   validation_method = "DNS"
 
-  subject_alternative_names = [
-    "bortplatforms.com",
-    "www.bortplatforms.com"
-  ]
 }
 
 resource "aws_route53_record" "cert_validation" {
