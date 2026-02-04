@@ -24,7 +24,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   aliases = concat(
     ["bortplatforms.com", "www.bortplatforms.com"],
-    [for app_name in keys(var.s3_buckets) : "${app_name}.bortplatforms.com"]
+    [for app in values(var.s3_buckets) : "${app.sub_domain}.bortplatforms.com"]
   )
 
   # Dynamic origins
@@ -52,7 +52,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     for_each = var.s3_buckets
     iterator = app
     content {
-      path_pattern           = "${app.key}/*"
+      path_pattern           = "${app.value.sub_domain}/*"
       target_origin_id       = "S3Origin-${app.key}"
       viewer_protocol_policy = "redirect-to-https"
       allowed_methods        = ["GET", "HEAD"]
@@ -76,12 +76,14 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 }
 
 resource "aws_acm_certificate" "cf_cert" {
-  provider = aws.east1
+  provider    = aws.east1
   domain_name = "bortplatforms.com"
+
   subject_alternative_names = concat(
     ["www.bortplatforms.com"],
-    [for app_name in keys(var.s3_buckets) : "${app_name}.bortplatforms.com"]
+    [for app in values(var.s3_buckets) : "${app.sub_domain}.bortplatforms.com"]
   )
+
   validation_method = "DNS"
 }
 
