@@ -15,7 +15,6 @@ resource "aws_cloudfront_origin_access_control" "s3_oac" {
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
-// ...existing code...
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   depends_on = [aws_acm_certificate_validation.cf_cert_validation]
@@ -40,7 +39,7 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
   # Default behavior for root domain
   default_cache_behavior {
-    target_origin_id       = "S3Origin-${keys(var.s3_buckets)[0]}"  # First app is default
+    target_origin_id       = "S3Origin-${keys(var.s3_buckets)[0]}"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
@@ -53,8 +52,8 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     for_each = var.s3_buckets
     iterator = app
     content {
-      path_pattern           = "${cache_behavior.key}/*"
-      target_origin_id       = "S3Origin-${cache_behavior.key}"
+      path_pattern           = "${app.key}/*"
+      target_origin_id       = "S3Origin-${app.key}"
       viewer_protocol_policy = "redirect-to-https"
       allowed_methods        = ["GET", "HEAD"]
       cached_methods         = ["GET", "HEAD"]
