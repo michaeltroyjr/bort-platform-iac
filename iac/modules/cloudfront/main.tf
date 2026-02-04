@@ -1,6 +1,6 @@
 terraform {
   required_providers {
-  aws = {
+    aws = {
       source  = "hashicorp/aws"
       version = "~> 5.0"
       configuration_aliases = [aws.east1]
@@ -9,38 +9,58 @@ terraform {
 }
 
 resource "aws_cloudfront_origin_access_control" "s3_oac" {
-  name                              = "s3-${var.sub_domain}"
-  description                       = "OAC for S3 bucket"
+  name                              = "s3-oac"
+  description                       = "OAC for S3 buckets"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
   signing_protocol                  = "sigv4"
 }
+// ...existing code...
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   depends_on = [aws_acm_certificate_validation.cf_cert_validation]
   enabled             = true
   default_root_object = "index.html"
-  web_acl_id                      = "arn:aws:wafv2:us-east-1:354672111799:global/webacl/CreatedByCloudFront-ed845f24/9adf3acf-ba9f-4787-874c-7daa075f6690"
+  web_acl_id          = var.web_acl_id
 
-  aliases = [
-    "${var.sub_domain}.bortplatforms.com"
-  ]
+  aliases = concat(
+    ["bortplatforms.com", "www.bortplatforms.com"],
+    [for app_name in keys(var.s3_buckets) : "${app_name}.bortplatforms.com"]
+  )
 
-  origin {
-    domain_name              = var.s3_bucket_domain_name
-    origin_id                = "S3Origin"
-    origin_path              = "/${var.sub_domain}"
-    origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
+  # Dynamic origins
+  dynamic "origin" {
+    for_each = var.s3_buckets
+    content {
+      domain_name              = origin.value.domain_name
+      origin_id                = "S3Origin-${origin.key}"
+      origin_access_control_id = aws_cloudfront_origin_access_control.s3_oac.id
+    }
   }
 
-
+  # Default behavior for root domain
   default_cache_behavior {
-    target_origin_id       = "S3Origin"
+    target_origin_id       = "S3Origin-${keys(var.s3_buckets)[0]}"  # First app is default
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
     cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
     compress               = true
+  }
+
+  # Dynamic behaviors for each app
+  dynamic "cache_behavior" {
+    for_each = var.s3_buckets
+    iterator = app
+    content {
+      path_pattern           = "${cache_behavior.key}/*"
+      target_origin_id       = "S3Origin-${cache_behavior.key}"
+      viewer_protocol_policy = "redirect-to-https"
+      allowed_methods        = ["GET", "HEAD"]
+      cached_methods         = ["GET", "HEAD"]
+      cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6"
+      compress               = true
+    }
   }
 
   viewer_certificate {
@@ -58,9 +78,12 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
 
 resource "aws_acm_certificate" "cf_cert" {
   provider = aws.east1
-  domain_name       = "${var.sub_domain}.bortplatforms.com"
+  domain_name = "bortplatforms.com"
+  subject_alternative_names = concat(
+    ["www.bortplatforms.com"],
+    [for app_name in keys(var.s3_buckets) : "${app_name}.bortplatforms.com"]
+  )
   validation_method = "DNS"
-
 }
 
 resource "aws_route53_record" "cert_validation" {
@@ -78,6 +101,7 @@ resource "aws_route53_record" "cert_validation" {
   type    = each.value.type
   ttl     = 300
   records = [each.value.record]
+  allow_overwrite = true
 }
 
 resource "aws_acm_certificate_validation" "cf_cert_validation" {
@@ -92,7 +116,7 @@ data "aws_iam_policy_document" "s3_cloudfront_policy" {
   statement {
     sid       = "AllowCloudFrontServicePrincipal"
     actions   = ["s3:GetObject"]
-    resources = ["${var.bucket_arn}/*"]
+    resources = ["arn:aws:s3:::*/*"]
 
     principals {
       type        = "Service"
@@ -102,13 +126,14 @@ data "aws_iam_policy_document" "s3_cloudfront_policy" {
     condition {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
-      values   = [ aws_cloudfront_distribution.s3_distribution.arn ]
+      values   = [aws_cloudfront_distribution.s3_distribution.arn]
     }
   }
 }
 
 resource "aws_s3_bucket_policy" "cloudfront_access" {
   depends_on = [aws_cloudfront_distribution.s3_distribution]
-  bucket = var.bucket_id
-  policy = data.aws_iam_policy_document.s3_cloudfront_policy.json
+  for_each   = var.s3_buckets
+  bucket     = each.value.id
+  policy     = data.aws_iam_policy_document.s3_cloudfront_policy.json
 }
