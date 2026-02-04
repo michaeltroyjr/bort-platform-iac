@@ -112,12 +112,12 @@ resource "aws_acm_certificate_validation" "cf_cert_validation" {
 }
 
 data "aws_iam_policy_document" "s3_cloudfront_policy" {
-  version = "2008-10-17"
+  for_each = var.s3_buckets
 
   statement {
     sid       = "AllowCloudFrontServicePrincipal"
     actions   = ["s3:GetObject"]
-    resources = ["arn:aws:s3:::*/*"]
+    resources = ["${each.value.arn}/*"]
 
     principals {
       type        = "Service"
@@ -136,5 +136,5 @@ resource "aws_s3_bucket_policy" "cloudfront_access" {
   depends_on = [aws_cloudfront_distribution.s3_distribution]
   for_each   = var.s3_buckets
   bucket     = each.value.id
-  policy     = data.aws_iam_policy_document.s3_cloudfront_policy.json
+  policy     = data.aws_iam_policy_document.s3_cloudfront_policy[each.key].json
 }
