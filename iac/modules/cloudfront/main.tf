@@ -47,8 +47,8 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
     compress               = true
   }
 
-  # Dynamic behaviors for each app
-  dynamic "cache_behavior" {
+  # Dynamic ordered behaviors for each app
+  dynamic "ordered_cache_behavior" {
     for_each = var.s3_buckets
     iterator = app
     content {
