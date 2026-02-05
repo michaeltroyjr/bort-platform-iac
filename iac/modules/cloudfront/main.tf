@@ -135,7 +135,3 @@ resource "aws_route53_record" "cloudfront_alias_ipv6" {
     evaluate_target_health = false
   }
 }
-
-    evaluate_target_health = false
-  }
-}
