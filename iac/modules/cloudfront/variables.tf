@@ -3,11 +3,6 @@ variable "web_acl_id" {
   description = "ID for Web ACL"
 }
 
-variable "hosted_zone_id" {
-  type        = string
-  description = "Route53 hosted zone ID"
-}
-
 variable "app_name" {
   type        = string
   description = "Name of the app"
